@@ -1,4 +1,4 @@
-import React, { useRef, useEffect} from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   select,
   scaleLinear,
@@ -7,8 +7,10 @@ import {
   curveCardinal,
   axisBottom,
   axisLeft,
+  brushX
 } from "d3";
 import useResizeObserver from "../ResizeObserver";
+import usePrevious from "../usePrevious";
 
 /**
  * Component that renders a BrushChart
@@ -17,7 +19,9 @@ import useResizeObserver from "../ResizeObserver";
 function BrushChart({data}) {
  const svgRef = useRef();
   const wrapperRef = useRef();
-  const dimensions = useResizeObserver(wrapperRef)
+  const dimensions = useResizeObserver(wrapperRef);
+  const [selection, setSelection] = useState([0, 1.5]);
+  const previousSelection = usePrevious(selection);
 
   // will be called initially and on every data change
   useEffect(() => {
@@ -54,7 +58,12 @@ function BrushChart({data}) {
       .join("circle")
       .attr("class", "my-dot")
       .attr("stroke", "black")
-      .attr("r", 2)
+      .attr("r", (value, index) => 
+        index >= selection[0] && index <= selection[1] ? 4 : 2
+      )
+      .attr("fill", (value, index) => 
+        index >= selection[0] && index <= selection[1] ? "orange" : "black"
+      )
       .attr("cx", (value, index) => xScale(index))
       .attr("cy", yScale)
 
@@ -67,7 +76,28 @@ function BrushChart({data}) {
 
     const yAxis = axisLeft(yScale);
     svg.select(".y-axis").call(yAxis);
-  }, [data, dimensions])
+
+    // brush
+    const brush = brushX()
+      .extent([
+        [0, 0], 
+        [width, height]
+      ])
+      .on("start brush end", (event) => {
+        if (event.selection) {
+          const indexSelection = event.selection.map(xScale.invert);
+          setSelection(indexSelection)
+        }
+      });
+
+    if (previousSelection === selection) {
+      svg
+        .select(".brush")
+        .call(brush)
+        .call(brush.move, selection.map(xScale))
+    }
+
+  }, [data, dimensions, previousSelection, selection])
 
   return (
     <React.Fragment>
@@ -75,9 +105,18 @@ function BrushChart({data}) {
         <svg ref={svgRef}>
           <g className="x-axis"/>
           <g className="y-axis"/>
-
+          <g className="brush"/>
         </svg>
       </div>
+      <small style={{ marginBottom: "1rem" }}>Selected values: [
+        {
+          data
+            .filter(
+              (value, index) => index >= selection[0] && index <= selection[1]
+            )
+            .join(",")
+        }
+      ]</small>
     </React.Fragment>
   )
 }
