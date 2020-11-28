@@ -1,38 +1,17 @@
 import React, { useState } from "react";
-import ForceGraph from "./ForceGraph";
+import BrushChart from "./Brushchart";
 import "./App.css";
 
-const initialData = {
-  name: "😐",
-  children: [
-    {
-      name: "🙂",
-      children: [
-        {
-          name: "😀"
-        },
-        {
-          name: "😁"
-        },
-        {
-          name: "🤣"
-        }
-      ]
-    },
-    {
-      name: "😔"
-    }
-  ]
-}
-
+const initialData = [10, 25, 30, 40, 25, 60] 
 function App() {
   const [data, setData] = useState(initialData)
 
-  return <React.Fragment>
-    <ForceGraph data={data}/>
-    <br/>
-    <button onClick={() => setData(initialData.children[0])}>Update Data</button>
-    </React.Fragment>;
+  return (
+    <React.Fragment>
+      <h2>Sub-selection with d3-brush</h2>
+      <BrushChart data={data}/>
+    </React.Fragment>
+  );
 }
 
 export default App;
