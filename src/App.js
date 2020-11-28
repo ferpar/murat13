@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import TreeChart from "./TreeChart";
 import ForceGraph from "./ForceGraph";
 import "./App.css";
 
