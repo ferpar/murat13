@@ -1,4 +1,4 @@
-import React { useRef, useEffect} from "react";
+import React, { useRef, useEffect} from "react";
 import {
   select,
   scaleLinear,
@@ -8,7 +8,7 @@ import {
   axisBottom,
   axisLeft,
 } from "d3";
-import useResizeObserver from "./useResizeObserver";
+import useResizeObserver from "../ResizeObserver";
 
 /**
  * Component that renders a BrushChart
@@ -22,7 +22,7 @@ function BrushChart({data}) {
   // will be called initially and on every data change
   useEffect(() => {
     const svg = select(svgRef.current);
-    const { width, height } = dimension || wrapperRef.current.getBoundingClientRect();
+    const { width, height } = dimensions || wrapperRef.current.getBoundingClientRect();
 
     // scales = Line generator
     const xScale = scaleLinear()
@@ -46,7 +46,7 @@ function BrushChart({data}) {
       .attr("class", "my-line")
       .attr("stroke", "black")
       .attr("fill", "none")
-      .attr("d", listGenerator);
+      .attr("d", lineGenerator);
 
     svg
       .selectAll(".my-dot")
@@ -61,7 +61,7 @@ function BrushChart({data}) {
     // axes
     const xAxis = axisBottom(xScale);
     svg
-      .select(.x-axis)
+      .select(".x-axis")
       .attr("transform", `translate(0, ${height})`)
       .call(xAxis)
 
@@ -75,6 +75,7 @@ function BrushChart({data}) {
         <svg ref={svgRef}>
           <g className="x-axis"/>
           <g className="y-axis"/>
+
         </svg>
       </div>
     </React.Fragment>
